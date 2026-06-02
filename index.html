@@ -1328,11 +1328,76 @@ function closeSettingsIfOutside(e) {
 }
 
 // ===== EXPORT / IMPORT =====
-function exportData() {
-  const blob = new Blob([JSON.stringify({version:1, exported: new Date().toISOString(), recipes}, null, 2)], {type:'application/json'});
+async function exportData() {
+  const filename = 'מתכונים_' + new Date().toLocaleDateString('he-IL').replace(/\//g,'-') + '.json';
+  const content = JSON.stringify({version:1, exported: new Date().toISOString(), recipes}, null, 2);
+  const blob = new Blob([content], {type:'application/json'});
+  const jsonFile = new File([blob], filename, {type:'application/json'});
+
+  // בנה תמונת כותרת לשיתוף
+  async function makeShareImage() {
+    return new Promise(resolve => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 800; canvas.height = 320;
+      const ctx = canvas.getContext('2d');
+
+      // טען תמונת רקע מה-header
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, 800, 320);
+        // שכבת כהייה
+        ctx.fillStyle = 'rgba(30,12,4,0.55)';
+        ctx.fillRect(0, 0, 800, 320);
+        // שם האפליקציה
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#F0C96A';
+        ctx.font = 'bold 72px serif';
+        ctx.fillText('הפארבאנד', 400, 160);
+        // תת-כותרת
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.font = '36px sans-serif';
+        ctx.fillText('מתכונים מבית טוב', 400, 220);
+        // מספר מתכונים
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.font = '28px sans-serif';
+        ctx.fillText(recipes.length + ' מתכונים', 400, 275);
+
+        canvas.toBlob(b => {
+          resolve(new File([b], 'הפארבאנד.jpg', {type:'image/jpeg'}));
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = () => resolve(null);
+      // חלץ את ה-dataURL מה-CSS של ה-header
+      const headerStyle = window.getComputedStyle(document.querySelector('header'));
+      const bg = headerStyle.backgroundImage;
+      const match = bg.match(/url\(["']?(data:image[^"')]+)["']?\)/);
+      if (match) { img.src = match[1]; }
+      else { resolve(null); }
+    });
+  }
+
+  const shareImg = await makeShareImage();
+  const filesToShare = shareImg ? [shareImg, jsonFile] : [jsonFile];
+
+  // נסה Web Share API
+  if (navigator.share && navigator.canShare && navigator.canShare({files: filesToShare})) {
+    try {
+      await navigator.share({
+        title: 'הפארבאנד — מתכונים מבית טוב',
+        text: '📖 ' + recipes.length + ' מתכונים מהפארבאנד שלנו',
+        files: filesToShare
+      });
+      showToast('✅ שותף בהצלחה');
+      return;
+    } catch(e) {
+      if (e.name === 'AbortError') return;
+    }
+  }
+
+  // גיבוי - הורדה רגילה
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'מתכונים_' + new Date().toLocaleDateString('he-IL').replace(/\//g,'-') + '.json';
+  a.download = filename;
   a.click();
   showToast('📤 הקובץ הורד');
 }
