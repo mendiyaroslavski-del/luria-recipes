@@ -1061,7 +1061,7 @@ function openView(id) {
 
   // Actions
   document.getElementById('viewActions').innerHTML = `
-    <button class="btn-icon" onclick="printRecipe()" title="הדפסה / PDF">🖨️</button>
+    <button class="btn-icon" onclick="shareRecipe('${r.id}')" title="שיתוף מתכון">📤</button>
     <button class="btn-icon" onclick="editRecipe('${r.id}')" title="עריכה">✏️</button>
     <button class="btn-icon" onclick="confirmDelete('${r.id}')" title="מחיקה">🗑️</button>
   `;
@@ -1332,6 +1332,140 @@ function closeSettingsIfOutside(e) {
 }
 
 // ===== EXPORT / IMPORT =====
+function shareRecipe(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+
+  const CAT_COLORS = {
+    'בשרי':'#C0392B','חלבי':'#2980B9','פרווה':'#27AE60','אפייה':'#D4A847',
+    'קינוחים':'#8E44AD','סלטים':'#16A085','מרקים':'#E67E22','שתייה':'#1ABC9C',
+    'פסח':'#8B6914','דגים':'#1A6B9A','כללי':'#7F8C8D'
+  };
+  const color = CAT_COLORS[r.cat] || '#7F8C8D';
+
+  const ings = (r.ingredients||[]).filter(i=>i.name).map(i =>
+    `<li><span class="amt">${i.amount||''} ${i.unit||''}</span>${i.name}</li>`
+  ).join('');
+  const steps = (r.steps||[]).filter(Boolean).map((s,i) =>
+    `<li><span class="num">${i+1}</span><span>${s}</span></li>`
+  ).join('');
+  const meta = [
+    r.prepTime ? `⏱ הכנה: ${r.prepTime}` : '',
+    r.cookTime ? `🔥 בישול: ${r.cookTime}` : '',
+    r.servings ? `🍽 מנות: ${r.servings}` : ''
+  ].filter(Boolean).join(' &nbsp;|&nbsp; ');
+
+  const imgHtml = r.img
+    ? `<img src="${r.img}" class="recipe-img">`
+    : `<div class="recipe-img-placeholder">${CAT_EMOJI[r.cat]||'🍴'}</div>`;
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>${r.title} — הפארבאנד</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Playfair+Display:wght@700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Heebo', sans-serif; direction: rtl; background: white; color: #222; max-width: 600px; margin: 0 auto; }
+
+  .top-bar {
+    background: linear-gradient(135deg, #3D2010, #5C3D1E);
+    padding: 14px 20px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .top-bar .brand { color: #F0C96A; font-family: 'Playfair Display',serif; font-size: 1.1rem; }
+  .top-bar .sub { color: rgba(255,255,255,0.6); font-size: 0.75rem; }
+
+  .recipe-img { width: 100%; max-height: 240px; object-fit: cover; }
+  .recipe-img-placeholder {
+    width: 100%; height: 160px; background: #F5E6CE;
+    display: flex; align-items: center; justify-content: center; font-size: 5rem;
+  }
+
+  .content { padding: 20px; }
+
+  .cat-tag {
+    display: inline-block; font-size: 0.78rem; font-weight: 700;
+    padding: 3px 12px; border-radius: 50px; margin-bottom: 8px;
+    background: ${color}22; color: ${color};
+  }
+  h1 { font-family: 'Playfair Display',serif; font-size: 1.8rem; color: #3D2010; margin-bottom: 6px; line-height: 1.2; }
+  .desc { color: #777; font-size: 0.95rem; margin-bottom: 10px; }
+  .meta-bar {
+    display: flex; gap: 0; border: 1px solid #E8D8C4; border-radius: 10px;
+    overflow: hidden; margin-bottom: 20px;
+  }
+  .meta-item { flex: 1; padding: 10px 6px; text-align: center; border-left: 1px solid #E8D8C4; }
+  .meta-item:last-child { border-left: none; }
+  .meta-item .val { display: block; font-weight: 700; color: #C4622D; font-size: 0.95rem; }
+  .meta-item .lbl { display: block; font-size: 0.72rem; color: #999; }
+
+  h3 { font-size: 1rem; color: #5C3D1E; font-weight: 700; margin-bottom: 10px;
+    border-bottom: 1px solid #EDD9B8; padding-bottom: 5px; }
+  .section { margin-bottom: 20px; }
+
+  .ings { list-style: none; }
+  .ings li { padding: 7px 0; font-size: 0.93rem; border-bottom: 1px solid #F5ECD8;
+    display: flex; gap: 8px; align-items: center; }
+  .ings li::before { content: '•'; color: #C4622D; font-size: 1.1rem; }
+  .ings .amt { color: #C4622D; font-weight: 700; min-width: 60px; }
+
+  .steps { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .steps li { display: flex; gap: 12px; font-size: 0.93rem; line-height: 1.7; align-items: flex-start; }
+  .steps .num { background: #5C3D1E; color: white; border-radius: 50%;
+    min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem; font-weight: 700; flex-shrink: 0; margin-top: 3px; }
+
+  .notes-box { background: #FFFBF0; border: 1px solid #E8D48A; border-radius: 8px;
+    padding: 12px 14px; font-size: 0.9rem; color: #6B5500; line-height: 1.7; }
+
+  .footer { text-align: center; padding: 16px; color: #BBB; font-size: 0.8rem;
+    border-top: 1px solid #EEE; margin-top: 10px; }
+
+  .btn-print {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #C4622D; color: white; border: none; border-radius: 50px;
+    padding: 13px 30px; font-size: 1rem; font-weight: 700;
+    font-family: 'Heebo', sans-serif; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(196,98,45,0.5); z-index: 99;
+  }
+  @media print { .btn-print, .top-bar { display: none; } }
+</style>
+</head>
+<body>
+  <div class="top-bar">
+    <span class="brand">הפארבאנד</span>
+    <span class="sub">מתכונים מבית טוב</span>
+  </div>
+
+  ${imgHtml}
+
+  <div class="content">
+    <div class="cat-tag">${CAT_EMOJI[r.cat]||'🍴'} ${r.cat}</div>
+    <h1>${r.title}</h1>
+    ${r.desc ? `<p class="desc">${r.desc}</p>` : ''}
+
+    ${meta ? `<div class="meta-bar">
+      ${r.prepTime ? `<div class="meta-item"><span class="val">${r.prepTime}</span><span class="lbl">הכנה</span></div>` : ''}
+      ${r.cookTime ? `<div class="meta-item"><span class="val">${r.cookTime}</span><span class="lbl">בישול</span></div>` : ''}
+      ${r.servings ? `<div class="meta-item"><span class="val">${r.servings}</span><span class="lbl">מנות</span></div>` : ''}
+    </div>` : ''}
+
+    ${ings ? `<div class="section"><h3>🧺 מרכיבים</h3><ul class="ings">${ings}</ul></div>` : ''}
+    ${steps ? `<div class="section"><h3>👨‍🍳 אופן הכנה</h3><ol class="steps">${steps}</ol></div>` : ''}
+    ${r.notes ? `<div class="section"><h3>💡 הערות</h3><div class="notes-box">${r.notes}</div></div>` : ''}
+
+    <div class="footer">הפארבאנד — מתכונים מבית טוב</div>
+  </div>
+
+  <button class="btn-print" onclick="window.print()">📤 שתף / שמור PDF</button>
+</body>
+</html>`);
+  printWin.document.close();
+}
+
 function exportData() {
   if (!recipes.length) { showToast('אין מתכונים לייצוא'); return; }
 
