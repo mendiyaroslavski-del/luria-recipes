@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5C3D1E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ספר המתכונים שלנו</title>
+<link rel="manifest" id="manifest-link">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --cream: #FDF6EC;
+  --parchment: #F5E6CE;
+  --brown-dark: #3D2010;
+  --brown-mid: #5C3D1E;
+  --brown-light: #8B5E3C;
+  --terracotta: #C4622D;
+  --terracotta-light: #E8845A;
+  --gold: #D4A847;
+  --gold-light: #F0C96A;
+  --sage: #7A9E7E;
+  --sage-light: #A8C5AC;
+  --text-dark: #2C1A0E;
+  --text-mid: #5A3E2B;
+  --text-light: #9B7B5E;
+  --shadow: rgba(60,30,10,0.15);
+  --shadow-deep: rgba(60,30,10,0.30);
+  --radius: 18px;
+  --radius-sm: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Assistant', sans-serif;
+  background: var(--cream);
+  color: var(--text-dark);
+  min-height: 100vh;
+  direction: rtl;
+}
+
+/* ===== TEXTURE BACKGROUND ===== */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+
+/* ===== HEADER ===== */
+header {
+  background: linear-gradient(135deg, var(--brown-dark) 0%, var(--brown-mid) 60%, var(--brown-light) 100%);
+  color: white;
+  padding: 20px 20px 16px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 20px var(--shadow-deep);
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  color: var(--gold-light);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.header-title span {
+  display: block;
+  font-size: 0.75rem;
+  font-family: 'Assistant', sans-serif;
+  font-weight: 300;
+  color: rgba(255,255,255,0.7);
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+.header-actions { display: flex; gap: 8px; }
+
+.btn-icon {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+.btn-icon:hover { background: rgba(255,255,255,0.22); transform: scale(1.05); }
+
+/* SEARCH */
+.search-wrap {
+  position: relative;
+}
+.search-wrap input {
+  width: 100%;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 50px;
+  padding: 9px 42px 9px 16px;
+  color: white;
+  font-family: 'Assistant', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: background 0.2s;
+}
+.search-wrap input::placeholder { color: rgba(255,255,255,0.55); }
+.search-wrap input:focus { background: rgba(255,255,255,0.2); }
+.search-icon {
+  position: absolute;
+  left: 14px; top: 50%; transform: translateY(-50%);
+  color: rgba(255,255,255,0.6);
+  pointer-events: none; font-size: 1rem;
+}
+
+/* ===== CATEGORIES BAR ===== */
+.cats-bar {
+  padding: 14px 16px 6px;
+  display: flex; gap: 8px; overflow-x: auto;
+  scrollbar-width: none;
+  position: relative; z-index: 1;
+}
+.cats-bar::-webkit-scrollbar { display: none; }
+
+.cat-chip {
+  flex-shrink: 0;
+  background: white;
+  border: 2px solid var(--parchment);
+  color: var(--text-mid);
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px var(--shadow);
+}
+.cat-chip.active {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: white;
+  box-shadow: 0 3px 12px rgba(196,98,45,0.35);
+}
+.cat-chip:hover:not(.active) { border-color: var(--terracotta-light); color: var(--terracotta); }
+
+/* ===== MAIN CONTENT ===== */
+main {
+  padding: 12px 16px 100px;
+  position: relative; z-index: 1;
+}
+
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem;
+  color: var(--brown-mid);
+  font-weight: 700;
+}
+.count-badge {
+  background: var(--parchment);
+  color: var(--text-mid);
+  border-radius: 50px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* ===== RECIPE GRID ===== */
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  gap: 14px;
+}
+
+.recipe-card {
+  background: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 3px 14px var(--shadow);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: fadeIn 0.35s ease both;
+}
+.recipe-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px var(--shadow-deep); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+.card-img {
+  width: 100%; aspect-ratio: 4/3;
+  object-fit: cover;
+  background: var(--parchment);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.8rem;
+}
+.card-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.card-body { padding: 10px 11px 12px; }
+
+.card-cat {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.card-meta {
+  display: flex; gap: 8px; align-items: center;
+  font-size: 0.72rem;
+  color: var(--text-light);
+}
+.card-meta span { display: flex; align-items: center; gap: 2px; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text-light);
+}
+.empty-state .big-icon { font-size: 4rem; margin-bottom: 14px; opacity: 0.5; }
+.empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text-mid); margin-bottom: 8px; }
+.empty-state p { font-size: 0.9rem; line-height: 1.6; }
+
+/* ===== FAB ===== */
+.fab {
+  position: fixed;
+  bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--terracotta), var(--terracotta-light));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 14px 28px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(196,98,45,0.5);
+  display: flex; align-items: center; gap: 8px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 90;
+}
+.fab:hover { transform: translateX(-50%) translateY(-2px); box-shadow: 0 10px 30px rgba(196,98,45,0.6); }
+
+/* ===== OVERLAY / MODAL BASE ===== */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(30,15,5,0.55);
+  backdrop-filter: blur(3px);
+  z-index: 200;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.overlay.open { display: flex; animation: fadeOverlay 0.25s ease; }
+@keyframes fadeOverlay { from { opacity: 0; } to { opacity: 1; } }
+
+.sheet {
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  width: 100%; max-width: 600px;
+  max-height: 92vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.sheet-handle {
+  width: 44px; height: 4px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 2px;
+  margin: 12px auto 0;
+}
+
+.sheet-header {
+  padding: 12px 20px 14px;
+  border-bottom: 1px solid var(--parchment);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sheet-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  color: var(--brown-dark);
+  font-weight: 700;
+}
+.btn-close {
+  background: var(--parchment);
+  border: none;
+  border-radius: 50%;
+  width: 34px; height: 34px;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-mid);
+  transition: background 0.2s;
+}
+.btn-close:hover { background: #e8d5b8; }
+
+/* ===== FORM ===== */
+.form-body { padding: 18px 20px 24px; }
+
+.form-row { margin-bottom: 16px; }
+.form-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-mid);
+  margin-bottom: 5px;
+  letter-spacing: 0.02em;
+}
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: white;
+  border: 1.5px solid #E8D8C4;
+  border-radius: var(--radius-sm);
+  padding: 10px 13px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.2s;
+  direction: rtl;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px rgba(196,98,45,0.12);
+}
+.form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* Image upload */
+.img-upload-area {
+  border: 2px dashed #D5C0A5;
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--parchment);
+}
+.img-upload-area:hover { border-color: var(--terracotta); background: #FBF0E4; }
+.img-upload-area .icon { font-size: 2rem; margin-bottom: 6px; }
+.img-upload-area p { font-size: 0.85rem; color: var(--text-light); }
+.img-preview { max-width: 100%; border-radius: var(--radius-sm); max-height: 180px; object-fit: cover; }
+
+/* Ingredients list */
+.ing-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.ing-row { display: flex; gap: 6px; align-items: center; }
+.ing-row input { flex: 1; }
+.ing-row input:first-child { flex: 0.6; }
+.ing-row input:nth-child(2) { flex: 0.5; }
+.btn-del-ing {
+  background: #FDECEA; border: 1px solid #F5C6C2;
+  color: #C0392B; border-radius: 8px;
+  width: 34px; height: 34px; font-size: 1rem;
+  cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.btn-del-ing:hover { background: #FAD2CE; }
+
+.btn-add-row {
+  background: var(--parchment);
+  border: 1.5px dashed #C8A87A;
+  color: var(--brown-light);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  width: 100%;
+  font-family: 'Assistant', sans-serif;
+  font-size: 0.87rem; font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-add-row:hover { background: #F0DEC6; border-color: var(--terracotta); color: var(--terracotta); }
+
+/* Steps list */
+.steps-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.step-row { display: flex; gap: 6px; align-items: flex-start; }
+.step-num {
+  width: 28px; height: 28px; flex-shrink: 0;
+  background: var(--terracotta);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.8rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 5px;
+}
+.step-row textarea { flex: 1; min-height: 60px; }
+
+/* ===== SAVE BUTTON ===== */
+.btn-save {
+  width: 100%;
+  background: linear-gradient(135deg, var(--terracotta), var(--terracotta-light));
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 14px;
+  font-family: 'Assistant', sans-serif;
+  font-size: 1rem; font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(196,98,45,0.4);
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-top: 6px;
+}
+.btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(196,98,45,0.5); }
+
+/* ===== RECIPE VIEW ===== */
+.recipe-view-overlay {
+  position: fixed; inset: 0;
+  background: var(--cream);
+  z-index: 300;
+  overflow-y: auto;
+  display: none;
+}
+.recipe-view-overlay.open { display: block; animation: fadeIn 0.25s ease; }
+
+.view-header {
+  position: relative;
+  background: linear-gradient(180deg, var(--brown-dark) 0%, var(--brown-mid) 100%);
+  min-height: 200px;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 16px 20px 20px;
+  overflow: hidden;
+}
+.view-header-img {
+  position: absolute; inset: 0;
+  object-fit: cover; width: 100%; height: 100%;
+  opacity: 0.35;
+}
+.view-header-emoji {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5rem; opacity: 0.2;
+}
+.view-header-content { position: relative; z-index: 1; }
+.view-back {
+  position: absolute; top: 16px; right: 20px; z-index: 2;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white; border-radius: 50%;
+  width: 40px; height: 40px;
+  font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.view-actions {
+  position: absolute; top: 16px; left: 20px; z-index: 2;
+  display: flex; gap: 8px;
+}
+.view-cat-tag {
+  display: inline-block;
+  font-size: 0.75rem; font-weight: 700;
+  padding: 4px 12px; border-radius: 50px;
+  margin-bottom: 8px;
+  backdrop-filter: blur(4px);
+}
+.view-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 900;
+  color: white;
+  line-height: 1.2;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+}
+.view-desc {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.9rem; margin-top: 6px; line-height: 1.5;
+}
+
+.view-meta-bar {
+  display: flex; gap: 0;
+  background: white;
+  border-bottom: 1px solid var(--parchment);
+}
+.meta-item {
+  flex: 1; padding: 14px 8px;
+  text-align: center;
+  border-left: 1px solid var(--parchment);
+}
+.meta-item:last-child { border-left: none; }
+.meta-item .val { font-size: 1rem; font-weight: 700; color: var(--terracotta); display: block; }
+.meta-item .lbl { font-size: 0.72rem; color: var(--text-light); margin-top: 1px; display: block; }
+
+.view-body { padding: 20px 20px 60px; }
+
+.section-block { margin-bottom: 26px; }
+.section-block-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--brown-mid);
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-block-title::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(to left, transparent, var(--parchment));
+}
+
+.ing-display-list { list-style: none; }
+.ing-display-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--parchment);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.95rem;
+}
+.ing-display-list li:last-child { border-bottom: none; }
+.ing-display-list li::before {
+  content: '•'; color: var(--terracotta); font-size: 1.2rem; flex-shrink: 0;
+}
+.ing-amount { font-weight: 700; color: var(--terracotta); min-width: 50px; }
+
+.steps-display { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.step-display {
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.step-display .num {
+  flex-shrink: 0;
+  width: 32px; height: 32px;
+  background: var(--terracotta);
+  color: white; border-radius: 50%;
+  font-weight: 700; font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-display .txt {
+  flex: 1; line-height: 1.7; font-size: 0.97rem;
+  color: var(--text-dark); padding-top: 4px;
+}
+
+.notes-box {
+  background: #FFFBF0;
+  border: 1px solid #E8D48A;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-mid);
+}
+
+/* ===== SETTINGS SHEET ===== */
+.settings-row {
+  display: flex; align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--parchment);
+  gap: 14px; cursor: pointer;
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row .icon { font-size: 1.4rem; width: 40px; text-align: center; flex-shrink: 0; }
+.settings-row .info { flex: 1; }
+.settings-row .info b { display: block; font-size: 0.97rem; color: var(--text-dark); margin-bottom: 2px; }
+.settings-row .info small { color: var(--text-light); font-size: 0.82rem; }
+.settings-row .arrow { color: var(--text-light); }
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  header, .cats-bar, .fab, .view-back, .view-actions,
+  .recipe-view-overlay .view-header .btn-icon { display: none !important; }
+
+  .recipe-view-overlay {
+    position: static !important;
+    background: white !important;
+  }
+
+  .view-header {
+    min-height: 100px;
+    background: white !important;
+    border-bottom: 3px solid #333;
+    padding: 20px;
+  }
+  .view-header-img, .view-header-emoji { display: none !important; }
+  .view-title { color: #333 !important; text-shadow: none !important; font-size: 1.5rem; }
+  .view-desc { color: #666 !important; }
+  .view-cat-tag { background: #eee !important; color: #333 !important; }
+
+  body > *:not(.recipe-view-overlay) { display: none !important; }
+  .recipe-view-overlay { display: block !important; }
+
+  .view-meta-bar { border: 1px solid #ddd; margin-bottom: 10px; }
+  .meta-item .val { color: #333 !important; }
+
+  .print-header {
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+  .step-display .num { background: #333 !important; -webkit-print-color-adjust: exact; }
+  .ing-display-list li::before { color: #333 !important; -webkit-print-color-adjust: exact; }
+}
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--brown-dark);
+  color: white;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-size: 0.9rem; font-weight: 600;
+  z-index: 999;
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== CONFIRM DIALOG ===== */
+.confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 500;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.confirm-overlay.open { display: flex; }
+.confirm-box {
+  background: white;
+  border-radius: var(--radius);
+  padding: 24px 22px 20px;
+  max-width: 340px; width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.confirm-box h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 8px; color: var(--text-dark); }
+.confirm-box p { font-size: 0.9rem; color: var(--text-mid); margin-bottom: 20px; line-height: 1.5; }
+.confirm-btns { display: flex; gap: 10px; }
+.confirm-btns button {
+  flex: 1; padding: 11px; border-radius: 50px;
+  border: none; font-family: 'Assistant', sans-serif;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-cancel-c { background: var(--parchment); color: var(--text-mid); }
+.btn-confirm-del { background: #E74C3C; color: white; }
+
+/* CAT colors */
+.cat-בשרי { color: #C0392B; }
+.cat-חלבי { color: #2980B9; }
+.cat-פרווה { color: #27AE60; }
+.cat-אפייה { color: #D4A847; }
+.cat-קינוחים { color: #8E44AD; }
+.cat-סלטים { color: #16A085; }
+.cat-מרקים { color: #E67E22; }
+.cat-שתייה { color: #1ABC9C; }
+.bg-cat-בשרי { background: #FDECEA; color: #C0392B; }
+.bg-cat-חלבי { background: #EBF5FB; color: #2980B9; }
+.bg-cat-פרווה { background: #EAFAF1; color: #27AE60; }
+.bg-cat-אפייה { background: #FEF9E7; color: #D4A847; }
+.bg-cat-קינוחים { background: #F5EEF8; color: #8E44AD; }
+.bg-cat-סלטים { background: #E8F8F5; color: #16A085; }
+.bg-cat-מרקים { background: #FDF2E9; color: #E67E22; }
+.bg-cat-שתייה { background: #E8F8F5; color: #1ABC9C; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="header-title">
+      ספר המתכונים 📖
+      <span>המטבח שלנו</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="openSettings()" title="הגדרות">⚙️</button>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="חפש מתכון..." oninput="renderRecipes()">
+    <span class="search-icon">🔍</span>
+  </div>
+</header>
+
+<!-- CATEGORIES -->
+<div class="cats-bar" id="catsBar"></div>
+
+<!-- MAIN -->
+<main>
+  <div class="section-header">
+    <span class="section-title" id="sectionTitle">כל המתכונים</span>
+    <span class="count-badge" id="countBadge">0</span>
+  </div>
+  <div class="recipes-grid" id="recipesGrid"></div>
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <div class="big-icon">🥘</div>
+    <h3>אין מתכונים עדיין</h3>
+    <p>לחץ על "מתכון חדש"<br>להוספת המתכון הראשון שלך</p>
+  </div>
+</main>
+
+<!-- FAB -->
+<button class="fab" onclick="openAddForm()">
+  <span>＋</span> מתכון חדש
+</button>
+
+<!-- ===== FORM OVERLAY ===== -->
+<div class="overlay" id="formOverlay" onclick="closeFormIfOutside(event)">
+  <div class="sheet" id="formSheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <span class="sheet-title" id="formTitle">מתכון חדש</span>
+      <button class="btn-close" onclick="closeForm()">✕</button>
+    </div>
+    <div class="form-body">
+
+      <!-- IMAGE -->
+      <div class="form-row">
+        <label class="form-label">תמונה</label>
+        <div class="img-upload-area" onclick="document.getElementById('imgInput').click()" id="imgUploadArea">
+          <div class="icon">📷</div>
+          <p>לחץ להוספת תמונה</p>
+        </div>
+        <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+        <input type="hidden" id="formImg">
+      </div>
+
+      <!-- TITLE + CAT -->
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-label">שם המתכון *</label>
+          <input class="form-input" id="formTitleInput" placeholder="למשל: שניצל קריספי" required>
+        </div>
+        <div class="form-row">
+          <label class="form-label">קטגוריה</label>
+          <select class="form-select" id="formCat">
+            <option value="כללי">כללי</option>
+            <option value="בשרי">🥩 בשרי</option>
+            <option value="חלבי">🧀 חלבי</option>
+            <option value="פרווה">🥦 פרווה</option>
+            <option value="אפייה">🍞 אפייה</option>
+            <option value="קינוחים">🍰 קינוחים</option>
+            <option value="סלטים">🥗 סלטים</option>
+            <option value="מרקים">🍲 מרקים</option>
+            <option value="שתייה">🧃 שתייה</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div class="form-row">
+        <label class="form-label">תיאור קצר</label>
+        <input class="form-input" id="formDesc" placeholder="כמה מילים על המתכון...">
+      </div>
+
+      <!-- META -->
+      <div class="form-grid-3">
+        <div class="form-row">
+          <label class="form-label">⏱ הכנה</label>
+          <input class="form-input" id="formPrepTime" placeholder="20 דק">
+        </div>
+        <div class="form-row">
+          <label class="form-label">🔥 בישול</label>
+          <input class="form-input" id="formCookTime" placeholder="45 דק">
+        </div>
+        <div class="form-row">
+          <label class="form-label">🍽 מנות</label>
+          <input class="form-input" id="formServings" placeholder="4">
+        </div>
+      </div>
+
+      <!-- INGREDIENTS -->
+      <div class="form-row">
+        <label class="form-label">מרכיבים</label>
+        <div class="ing-list" id="ingList"></div>
+        <button type="button" class="btn-add-row" onclick="addIngRow()">＋ הוסף מרכיב</button>
+      </div>
+
+      <!-- INSTRUCTIONS -->
+      <div class="form-row">
+        <label class="form-label">אופן הכנה</label>
+        <div class="steps-list" id="stepsList"></div>
+        <button type="button" class="btn-add-row" onclick="addStepRow()">＋ הוסף שלב</button>
+      </div>
+
+      <!-- NOTES -->
+      <div class="form-row">
+        <label class="form-label">הערות והמלצות</label>
+        <textarea class="form-textarea" id="formNotes" placeholder="טיפים, תחליפים, וריאציות..."></textarea>
+      </div>
+
+      <input type="hidden" id="formId">
+      <button class="btn-save" onclick="saveRecipe()">💾 שמור מתכון</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RECIPE VIEW ===== -->
+<div class="recipe-view-overlay" id="recipeView">
+  <div class="print-header" style="display:none;">ספר המתכונים שלנו — המטבח שלנו</div>
+  <div class="view-header" id="viewHeader">
+    <button class="view-back" onclick="closeView()">→</button>
+    <div class="view-actions" id="viewActions"></div>
+    <div id="viewHeaderBg"></div>
+    <div class="view-header-content">
+      <div class="view-cat-tag" id="viewCatTag"></div>
+      <h1 class="view-title" id="viewTitle"></h1>
+      <p class="view-desc" id="viewDesc"></p>
+    </div>
+  </div>
+
+  <div class="view-meta-bar" id="viewMetaBar"></div>
+  <div class="view-body" id="viewBody"></div>
+</div>
+
+<!-- ===== SETTINGS OVERLAY ===== -->
+<div class="overlay" id="settingsOverlay" onclick="closeSettingsIfOutside(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <span class="sheet-title">⚙️ הגדרות</span>
+      <button class="btn-close" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="form-body">
+      <div class="settings-row" onclick="exportData()">
+        <span class="icon">📤</span>
+        <div class="info">
+          <b>ייצוא מתכונים</b>
+          <small>שמור קובץ JSON עם כל המתכונים לשיתוף עם המשפחה</small>
+        </div>
+        <span class="arrow">‹</span>
+      </div>
+      <div class="settings-row" onclick="document.getElementById('importInput').click()">
+        <span class="icon">📥</span>
+        <div class="info">
+          <b>ייבוא מתכונים</b>
+          <small>טען קובץ JSON שקיבלת ממישהו במשפחה</small>
+        </div>
+        <span class="arrow">‹</span>
+      </div>
+      <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
+      <div class="settings-row" onclick="if(confirm('למחוק את כל המתכונים?')){localStorage.removeItem(DB_KEY);recipes=[];renderRecipes();closeSettings();showToast('נמחק הכל');}">
+        <span class="icon">🗑️</span>
+        <div class="info">
+          <b>מחק את כל המתכונים</b>
+          <small>פעולה בלתי הפיכה!</small>
+        </div>
+        <span class="arrow">‹</span>
+      </div>
+      <div class="settings-row" style="cursor:default;">
+        <span class="icon">📊</span>
+        <div class="info">
+          <b id="statsText">0 מתכונים שמורים</b>
+          <small id="statsText2">גרסה 1.0</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">מחיקת מתכון</h3>
+    <p id="confirmMsg"></p>
+    <div class="confirm-btns">
+      <button class="btn-cancel-c" onclick="closeConfirm()">ביטול</button>
+      <button class="btn-confirm-del" id="confirmOkBtn">מחק</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== DATA =====
+const DB_KEY = 'luria_recipes_v1';
+let recipes = [];
+let activeCat = 'הכל';
+let viewingId = null;
+let editingId = null;
+
+const CAT_EMOJI = {
+  'כללי':'🍴','בשרי':'🥩','חלבי':'🧀','פרווה':'🥦',
+  'אפייה':'🍞','קינוחים':'🍰','סלטים':'🥗','מרקים':'🍲','שתייה':'🧃'
+};
+
+// ===== STORAGE =====
+function save() {
+  localStorage.setItem(DB_KEY, JSON.stringify(recipes));
+}
+function load() {
+  try {
+    const d = localStorage.getItem(DB_KEY);
+    recipes = d ? JSON.parse(d) : [];
+  } catch(e) { recipes = []; }
+}
+
+// ===== RENDER CATEGORIES =====
+function renderCats() {
+  const bar = document.getElementById('catsBar');
+  const cats = ['הכל', ...Object.keys(CAT_EMOJI)];
+  bar.innerHTML = cats.map(c => `
+    <button class="cat-chip ${c === activeCat ? 'active' : ''}" onclick="setCat('${c}')">
+      ${c !== 'הכל' ? (CAT_EMOJI[c]||'') + ' ' : ''}${c}
+    </button>
+  `).join('');
+}
+function setCat(c) {
+  activeCat = c;
+  renderCats();
+  renderRecipes();
+}
+
+// ===== RENDER RECIPES =====
+function renderRecipes() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = recipes.slice();
+  if (activeCat !== 'הכל') list = list.filter(r => r.cat === activeCat);
+  if (q) list = list.filter(r => r.title.toLowerCase().includes(q) || (r.desc||'').toLowerCase().includes(q));
+
+  const title = activeCat === 'הכל' ? 'כל המתכונים' : (CAT_EMOJI[activeCat]||'') + ' ' + activeCat;
+  document.getElementById('sectionTitle').textContent = title;
+  document.getElementById('countBadge').textContent = list.length;
+
+  const grid = document.getElementById('recipesGrid');
+  const empty = document.getElementById('emptyState');
+
+  if (!list.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = list.map((r, i) => `
+    <div class="recipe-card" onclick="openView('${r.id}')" style="animation-delay:${i*0.05}s">
+      <div class="card-img">
+        ${r.img ? `<img src="${r.img}" alt="${r.title}" loading="lazy">` : `<span>${CAT_EMOJI[r.cat]||'🍴'}</span>`}
+      </div>
+      <div class="card-body">
+        <div class="card-cat cat-${r.cat}">${CAT_EMOJI[r.cat]||'🍴'} ${r.cat}</div>
+        <div class="card-title">${r.title}</div>
+        <div class="card-meta">
+          ${r.prepTime ? `<span>⏱ ${r.prepTime}</span>` : ''}
+          ${r.servings ? `<span>🍽 ${r.servings}</span>` : ''}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== VIEW RECIPE =====
+function openView(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  viewingId = id;
+
+  // Header
+  const hdr = document.getElementById('viewHeader');
+  const bg = document.getElementById('viewHeaderBg');
+  if (r.img) {
+    bg.innerHTML = `<img class="view-header-img" src="${r.img}">`;
+  } else {
+    bg.innerHTML = `<div class="view-header-emoji">${CAT_EMOJI[r.cat]||'🍴'}</div>`;
+  }
+
+  document.getElementById('viewCatTag').textContent = (CAT_EMOJI[r.cat]||'') + ' ' + r.cat;
+  document.getElementById('viewCatTag').className = `view-cat-tag bg-cat-${r.cat}`;
+  document.getElementById('viewTitle').textContent = r.title;
+  document.getElementById('viewDesc').textContent = r.desc || '';
+
+  // Actions
+  document.getElementById('viewActions').innerHTML = `
+    <button class="btn-icon" onclick="printRecipe()" title="הדפסה / PDF">🖨️</button>
+    <button class="btn-icon" onclick="editRecipe('${r.id}')" title="עריכה">✏️</button>
+    <button class="btn-icon" onclick="confirmDelete('${r.id}')" title="מחיקה">🗑️</button>
+  `;
+
+  // Meta bar
+  const metas = [];
+  if (r.prepTime) metas.push({ val: r.prepTime, lbl: 'הכנה' });
+  if (r.cookTime) metas.push({ val: r.cookTime, lbl: 'בישול' });
+  if (r.servings) metas.push({ val: r.servings, lbl: 'מנות' });
+  document.getElementById('viewMetaBar').innerHTML = metas.length
+    ? metas.map(m => `<div class="meta-item"><span class="val">${m.val}</span><span class="lbl">${m.lbl}</span></div>`).join('')
+    : '';
+
+  // Body
+  let html = '';
+
+  if (r.ingredients && r.ingredients.length) {
+    html += `<div class="section-block">
+      <div class="section-block-title">🧺 מרכיבים</div>
+      <ul class="ing-display-list">
+        ${r.ingredients.filter(i=>i.name).map(i => `
+          <li>
+            <span class="ing-amount">${i.amount||''} ${i.unit||''}</span>
+            <span>${i.name}</span>
+          </li>
+        `).join('')}
+      </ul>
+    </div>`;
+  }
+
+  if (r.steps && r.steps.length) {
+    html += `<div class="section-block">
+      <div class="section-block-title">👨‍🍳 אופן הכנה</div>
+      <ol class="steps-display">
+        ${r.steps.filter(s=>s).map((s, i) => `
+          <li class="step-display">
+            <span class="num">${i+1}</span>
+            <span class="txt">${s}</span>
+          </li>
+        `).join('')}
+      </ol>
+    </div>`;
+  }
+
+  if (r.notes) {
+    html += `<div class="section-block">
+      <div class="section-block-title">💡 הערות</div>
+      <div class="notes-box">${r.notes}</div>
+    </div>`;
+  }
+
+  document.getElementById('viewBody').innerHTML = html;
+
+  const view = document.getElementById('recipeView');
+  view.classList.add('open');
+  view.scrollTop = 0;
+}
+
+function closeView() {
+  document.getElementById('recipeView').classList.remove('open');
+  viewingId = null;
+}
+
+function printRecipe() {
+  window.print();
+}
+
+// ===== ADD/EDIT FORM =====
+function openAddForm() {
+  editingId = null;
+  document.getElementById('formTitle').textContent = '✨ מתכון חדש';
+  clearForm();
+  addIngRow(); addIngRow(); addIngRow();
+  addStepRow(); addStepRow();
+  document.getElementById('formOverlay').classList.add('open');
+}
+
+function editRecipe(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  editingId = id;
+  closeView();
+
+  document.getElementById('formTitle').textContent = '✏️ עריכת מתכון';
+  clearForm();
+
+  document.getElementById('formTitleInput').value = r.title || '';
+  document.getElementById('formCat').value = r.cat || 'כללי';
+  document.getElementById('formDesc').value = r.desc || '';
+  document.getElementById('formPrepTime').value = r.prepTime || '';
+  document.getElementById('formCookTime').value = r.cookTime || '';
+  document.getElementById('formServings').value = r.servings || '';
+  document.getElementById('formNotes').value = r.notes || '';
+  document.getElementById('formId').value = r.id;
+
+  if (r.img) {
+    document.getElementById('formImg').value = r.img;
+    document.getElementById('imgUploadArea').innerHTML = `<img class="img-preview" src="${r.img}">`;
+  }
+
+  const ings = r.ingredients && r.ingredients.length ? r.ingredients : [{},{},{}];
+  ings.forEach(ing => addIngRow(ing));
+  if (!ings.length) addIngRow();
+
+  const steps = r.steps && r.steps.length ? r.steps : ['',''];
+  steps.forEach(s => addStepRow(s));
+  if (!steps.length) addStepRow();
+
+  document.getElementById('formOverlay').classList.add('open');
+}
+
+function clearForm() {
+  document.getElementById('formTitleInput').value = '';
+  document.getElementById('formCat').value = 'כללי';
+  document.getElementById('formDesc').value = '';
+  document.getElementById('formPrepTime').value = '';
+  document.getElementById('formCookTime').value = '';
+  document.getElementById('formServings').value = '';
+  document.getElementById('formNotes').value = '';
+  document.getElementById('formId').value = '';
+  document.getElementById('formImg').value = '';
+  document.getElementById('imgUploadArea').innerHTML = `<div class="icon">📷</div><p>לחץ להוספת תמונה</p>`;
+  document.getElementById('ingList').innerHTML = '';
+  document.getElementById('stepsList').innerHTML = '';
+}
+
+function closeForm() {
+  document.getElementById('formOverlay').classList.remove('open');
+}
+function closeFormIfOutside(e) {
+  if (e.target.id === 'formOverlay') closeForm();
+}
+
+function handleImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 3 * 1024 * 1024) { showToast('תמונה גדולה מדי (מקס 3MB)'); return; }
+  const r = new FileReader();
+  r.onload = ev => {
+    // Resize
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX = 600;
+      let w = img.width, h = img.height;
+      if (w > MAX) { h = h * MAX / w; w = MAX; }
+      if (h > MAX) { w = w * MAX / h; h = MAX; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const data = canvas.toDataURL('image/jpeg', 0.75);
+      document.getElementById('formImg').value = data;
+      document.getElementById('imgUploadArea').innerHTML = `<img class="img-preview" src="${data}">`;
+    };
+    img.src = ev.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+// Ingredients
+function addIngRow(ing) {
+  ing = ing || {};
+  const list = document.getElementById('ingList');
+  const div = document.createElement('div');
+  div.className = 'ing-row';
+  div.innerHTML = `
+    <input class="form-input" placeholder="כמות" value="${ing.amount||''}" style="flex:0.5">
+    <input class="form-input" placeholder="יחידה" value="${ing.unit||''}" style="flex:0.5">
+    <input class="form-input" placeholder="שם המרכיב" value="${ing.name||''}" style="flex:1.5">
+    <button type="button" class="btn-del-ing" onclick="this.closest('.ing-row').remove()">✕</button>
+  `;
+  list.appendChild(div);
+}
+
+// Steps
+function addStepRow(txt) {
+  const list = document.getElementById('stepsList');
+  const n = list.children.length + 1;
+  const div = document.createElement('div');
+  div.className = 'step-row';
+  div.innerHTML = `
+    <span class="step-num">${n}</span>
+    <textarea class="form-textarea form-input" placeholder="תאר שלב ${n}..." rows="2">${txt||''}</textarea>
+    <button type="button" class="btn-del-ing" onclick="removeStep(this)">✕</button>
+  `;
+  list.appendChild(div);
+}
+function removeStep(btn) {
+  btn.closest('.step-row').remove();
+  // renumber
+  document.querySelectorAll('#stepsList .step-num').forEach((el, i) => el.textContent = i+1);
+}
+
+// ===== SAVE =====
+function saveRecipe() {
+  const title = document.getElementById('formTitleInput').value.trim();
+  if (!title) { showToast('⚠️ חסר שם מתכון'); return; }
+
+  const ings = Array.from(document.querySelectorAll('#ingList .ing-row')).map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { amount: inputs[0].value.trim(), unit: inputs[1].value.trim(), name: inputs[2].value.trim() };
+  }).filter(i => i.name);
+
+  const steps = Array.from(document.querySelectorAll('#stepsList textarea')).map(t => t.value.trim()).filter(Boolean);
+
+  const r = {
+    id: editingId || ('r_' + Date.now()),
+    title,
+    cat: document.getElementById('formCat').value,
+    desc: document.getElementById('formDesc').value.trim(),
+    prepTime: document.getElementById('formPrepTime').value.trim(),
+    cookTime: document.getElementById('formCookTime').value.trim(),
+    servings: document.getElementById('formServings').value.trim(),
+    notes: document.getElementById('formNotes').value.trim(),
+    img: document.getElementById('formImg').value,
+    ingredients: ings,
+    steps: steps,
+    updatedAt: new Date().toISOString()
+  };
+
+  if (editingId) {
+    const idx = recipes.findIndex(x => x.id === editingId);
+    if (idx >= 0) recipes[idx] = { ...recipes[idx], ...r };
+  } else {
+    r.createdAt = r.updatedAt;
+    recipes.unshift(r);
+  }
+
+  save();
+  closeForm();
+  renderRecipes();
+  showToast(editingId ? '✅ המתכון עודכן' : '✅ המתכון נשמר!');
+  editingId = null;
+}
+
+// ===== DELETE =====
+function confirmDelete(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('confirmMsg').textContent = `למחוק את המתכון "${r.title}"?`;
+  document.getElementById('confirmOkBtn').onclick = () => {
+    recipes = recipes.filter(x => x.id !== id);
+    save();
+    closeConfirm();
+    closeView();
+    renderRecipes();
+    showToast('🗑️ המתכון נמחק');
+  };
+  document.getElementById('confirmOverlay').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+}
+
+// ===== SETTINGS =====
+function openSettings() {
+  document.getElementById('statsText').textContent = `${recipes.length} מתכונים שמורים`;
+  const cats = {};
+  recipes.forEach(r => cats[r.cat] = (cats[r.cat]||0)+1);
+  const top = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([c,n])=>`${CAT_EMOJI[c]||''}${c}(${n})`).join(' · ');
+  document.getElementById('statsText2').textContent = top || 'גרסה 1.0';
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.remove('open');
+}
+function closeSettingsIfOutside(e) {
+  if (e.target.id === 'settingsOverlay') closeSettings();
+}
+
+// ===== EXPORT / IMPORT =====
+function exportData() {
+  const blob = new Blob([JSON.stringify({version:1, exported: new Date().toISOString(), recipes}, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'מתכונים_' + new Date().toLocaleDateString('he-IL').replace(/\//g,'-') + '.json';
+  a.click();
+  showToast('📤 הקובץ הורד');
+}
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const incoming = data.recipes || data;
+      if (!Array.isArray(incoming)) throw new Error('פורמט לא תקין');
+      let added = 0, updated = 0;
+      incoming.forEach(nr => {
+        const existing = recipes.findIndex(x => x.id === nr.id);
+        if (existing >= 0) { recipes[existing] = nr; updated++; }
+        else { recipes.push(nr); added++; }
+      });
+      save();
+      renderRecipes();
+      closeSettings();
+      showToast(`✅ ${added} חדשים, ${updated} עודכנו`);
+    } catch(ex) {
+      showToast('❌ שגיאה בקובץ: ' + ex.message);
+    }
+    e.target.value = '';
+  };
+  r.readAsText(file);
+}
+
+// ===== TOAST =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ===== PWA MANIFEST =====
+function injectManifest() {
+  const manifest = {
+    name: 'ספר המתכונים שלנו',
+    short_name: 'מתכונים',
+    start_url: window.location.href,
+    display: 'standalone',
+    background_color: '#FDF6EC',
+    theme_color: '#5C3D1E',
+    dir: 'rtl',
+    lang: 'he',
+    icons: [{src: makeIcon(), sizes: '192x192', type: 'image/png'}]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  document.getElementById('manifest-link').href = URL.createObjectURL(blob);
+}
+
+function makeIcon() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 192;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#5C3D1E';
+  ctx.fillRect(0,0,192,192);
+  ctx.font = '110px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('📖', 96, 96);
+  return c.toDataURL('image/png');
+}
+
+// ===== SERVICE WORKER =====
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  const sw = `
+    const CACHE = 'recipes-v1';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])));
+      self.skipWaiting();
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    });
+  `;
+  const blob = new Blob([sw], {type:'text/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob));
+}
+
+// ===== INIT =====
+load();
+injectManifest();
+registerSW();
+renderCats();
+renderRecipes();
+</script>
+</body>
+</html>
