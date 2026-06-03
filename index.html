@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#5C3D1E">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>הפארבאנד</title>
+<title>ירוסלבסקי</title>
 <link rel="manifest" id="manifest-link">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Assistant:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -69,7 +69,7 @@ header {
 
 .header-title {
   font-family: 'Playfair Display', serif;
-  font-size: 1.35rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.1;
@@ -742,6 +742,53 @@ main {
 }
 .passover-banner.show { display: block; animation: fadeIn 0.3s ease; }
 .passover-banner small { opacity: 0.85; font-size: 0.78rem; display: block; margin-top: 3px; font-weight: 400; }
+
+/* ===== BRAND LOGO ===== */
+.brand-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  direction: rtl;
+  gap: 1px;
+  padding: 4px 10px 2px;
+}
+.heart-svg {
+  position: absolute;
+  width: 210px;
+  height: 95px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px rgba(196,98,45,0.4));
+}
+.brand-before, .brand-after {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #F0C96A;
+  letter-spacing: 0.01em;
+  position: relative; z-index: 1;
+}
+.brand-lev {
+  font-family: 'Georgia', 'Playfair Display', serif;
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  position: relative; z-index: 1;
+  text-shadow: 0 1px 10px rgba(196,98,45,0.7), 0 0 20px rgba(240,201,106,0.4);
+  margin: 0 3px;
+  font-style: italic;
+}
+.brand-sub {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.72);
+  letter-spacing: 0.12em;
+  font-style: italic;
+}
 </style>
 </head>
 <body>
@@ -750,8 +797,14 @@ main {
 <header>
   <div class="header-top">
     <div class="header-title">
-      הפארבאנד
-      <span>מתכונים מבית טוב</span>
+      <div class="brand-logo">
+        <svg class="heart-svg" viewBox="0 0 220 100" xmlns="http://www.w3.org/2000/svg">
+          <path d="M110,85 C90,68 30,45 30,22 C30,8 42,0 55,0 C70,0 85,10 110,30 C135,10 150,0 165,0 C178,0 190,8 190,22 C190,45 130,68 110,85 Z"
+            fill="#C4622D" opacity="0.28"/>
+        </svg>
+        <span class="brand-before">ירוס</span><span class="brand-lev">לב</span><span class="brand-after">סקי</span>
+      </div>
+      <span class="brand-sub">אוכל עושים באהבה</span>
     </div>
     <div class="header-actions">
       <button class="btn-icon" onclick="exportData()" title="שיתוף מתכונים">📤</button>
@@ -1364,7 +1417,7 @@ function shareRecipe(id) {
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>${r.title} — הפארבאנד</title>
+<title>${r.title} — ירוסלבסקי</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Playfair+Display:wght@700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1432,12 +1485,59 @@ function shareRecipe(id) {
     box-shadow: 0 6px 20px rgba(196,98,45,0.5); z-index: 99;
   }
   @media print { .btn-print, .top-bar { display: none; } }
+
+/* ===== BRAND LOGO ===== */
+.brand-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  direction: rtl;
+  gap: 1px;
+  padding: 4px 10px 2px;
+}
+.heart-svg {
+  position: absolute;
+  width: 210px;
+  height: 95px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px rgba(196,98,45,0.4));
+}
+.brand-before, .brand-after {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #F0C96A;
+  letter-spacing: 0.01em;
+  position: relative; z-index: 1;
+}
+.brand-lev {
+  font-family: 'Georgia', 'Playfair Display', serif;
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  position: relative; z-index: 1;
+  text-shadow: 0 1px 10px rgba(196,98,45,0.7), 0 0 20px rgba(240,201,106,0.4);
+  margin: 0 3px;
+  font-style: italic;
+}
+.brand-sub {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.72);
+  letter-spacing: 0.12em;
+  font-style: italic;
+}
 </style>
 </head>
 <body>
   <div class="top-bar">
-    <span class="brand">הפארבאנד</span>
-    <span class="sub">מתכונים מבית טוב</span>
+    <span class="brand" style="font-size:1rem;">ירוס<span style="font-size:1.35rem; color:#fff; margin:0 1px;">לב</span>סקי</span>
+    <span class="sub">אוכל עושים באהבה</span>
   </div>
 
   ${imgHtml}
@@ -1457,7 +1557,7 @@ function shareRecipe(id) {
     ${steps ? `<div class="section"><h3>👨‍🍳 אופן הכנה</h3><ol class="steps">${steps}</ol></div>` : ''}
     ${r.notes ? `<div class="section"><h3>💡 הערות</h3><div class="notes-box">${r.notes}</div></div>` : ''}
 
-    <div class="footer">הפארבאנד — מתכונים מבית טוב</div>
+    <div class="footer">ירוסלבסקי — אוכל עושים באהבה</div>
   </div>
 
   <button class="btn-print" onclick="window.print()">📤 שתף / שמור PDF</button>
@@ -1508,7 +1608,7 @@ function exportData() {
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<title>הפארבאנד — מתכונים מבית טוב</title>
+<title>ירוסלבסקי — אוכל עושים באהבה</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=Playfair+Display:wght@700&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1564,12 +1664,59 @@ function exportData() {
     cursor: pointer; box-shadow: 0 6px 20px rgba(196,98,45,0.5);
     z-index: 99;
   }
+
+/* ===== BRAND LOGO ===== */
+.brand-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  direction: rtl;
+  gap: 1px;
+  padding: 4px 10px 2px;
+}
+.heart-svg {
+  position: absolute;
+  width: 210px;
+  height: 95px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 8px rgba(196,98,45,0.4));
+}
+.brand-before, .brand-after {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #F0C96A;
+  letter-spacing: 0.01em;
+  position: relative; z-index: 1;
+}
+.brand-lev {
+  font-family: 'Georgia', 'Playfair Display', serif;
+  font-size: 2.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+  position: relative; z-index: 1;
+  text-shadow: 0 1px 10px rgba(196,98,45,0.7), 0 0 20px rgba(240,201,106,0.4);
+  margin: 0 3px;
+  font-style: italic;
+}
+.brand-sub {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.72);
+  letter-spacing: 0.12em;
+  font-style: italic;
+}
 </style>
 </head>
 <body>
   <div class="cover">
-    <h1>הפארבאנד</h1>
-    <p>מתכונים מבית טוב</p>
+    <h1>ירוסלבסקי</h1>
+    <p>אוכל עושים באהבה</p>
     <p class="count">${recipes.length} מתכונים · ${new Date().toLocaleDateString('he-IL')}</p>
   </div>
   ${recipeHTML}
@@ -1617,8 +1764,8 @@ function showToast(msg) {
 // ===== PWA MANIFEST =====
 function injectManifest() {
   const manifest = {
-    name: 'ספר המתכונים שלנו',
-    short_name: 'מתכונים',
+    name: 'ירוסלבסקי',
+    short_name: 'ירוסלבסקי',
     start_url: window.location.href,
     display: 'standalone',
     background_color: '#FDF6EC',
