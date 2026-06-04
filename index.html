@@ -805,8 +805,7 @@ main {
 .sync-status {
   display: flex; align-items: center; gap: 6px;
   font-size: 0.78rem; padding: 6px 12px;
-  border-radius: 50px; margin-bottom: 4px;
-  font-weight: 600;
+  border-radius: 50px; margin-bottom: 8px; font-weight: 600;
 }
 .sync-status.connected { background: #EAFAF1; color: #1E8449; }
 .sync-status.disconnected { background: #FEF9E7; color: #9A7D0A; }
@@ -815,27 +814,37 @@ main {
 .sync-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .sync-status.connected .sync-dot { background: #27AE60; }
 .sync-status.disconnected .sync-dot { background: #F39C12; }
-.sync-status.syncing .sync-dot { background: #2980B9; animation: pulse 1s infinite; }
+.sync-status.syncing .sync-dot { background: #2980B9; animation: blink 1s infinite; }
 .sync-status.error .sync-dot { background: #E74C3C; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-.cloud-input-row { display: flex; gap: 8px; margin-top: 8px; }
-.cloud-input-row input { flex: 1; }
 .btn-cloud {
   background: var(--brown-mid); color: white; border: none;
   border-radius: var(--radius-sm); padding: 10px 14px;
   font-family: 'Assistant', sans-serif; font-size: 0.88rem;
   font-weight: 700; cursor: pointer; white-space: nowrap;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s; width: 100%; margin-top: 8px;
 }
 .btn-cloud:hover { opacity: 0.85; }
 .btn-cloud.green { background: #1E8449; }
-.cloud-code-display {
+.btn-cloud.red { background: #C0392B; }
+.cloud-input-row { display: flex; gap: 8px; margin-top: 8px; }
+.cloud-input-row input { flex: 1; }
+.cloud-input-row .btn-cloud { width: auto; margin-top: 0; }
+.cloud-code-box {
   background: var(--parchment); border-radius: var(--radius-sm);
-  padding: 10px 14px; font-size: 0.9rem; color: var(--text-dark);
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 8px; font-weight: 600; letter-spacing: 0.05em;
+  padding: 10px 14px; font-size: 0.78rem; color: var(--text-mid);
+  margin-top: 8px; word-break: break-all; line-height: 1.5;
+  border: 1px solid #D5C0A5;
 }
+.setup-steps {
+  background: #FBF7F0; border: 1px solid #E0CBA8;
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  margin-top: 8px; font-size: 0.82rem; line-height: 1.8;
+  color: var(--text-mid);
+}
+.setup-steps ol { padding-right: 18px; }
+.setup-steps a { color: var(--terracotta); }
 </style>
 </head>
 <body>
@@ -1030,26 +1039,36 @@ main {
           <span class="sync-dot"></span>
           <span id="syncStatusText">לא מחובר לענן</span>
         </div>
+
+        <!-- CONNECTED UI -->
         <div id="cloudConnectedUI" style="display:none;">
-          <div class="cloud-code-display">
-            <span id="cloudCodeDisplay"></span>
-            <button class="btn-cloud" onclick="copyCloudCode()">העתק קוד</button>
-          </div>
-          <div style="font-size:0.78rem;color:var(--text-light);margin-top:6px;line-height:1.5;">
-            שתף קוד זה עם בני המשפחה כדי שיוכלו להצטרף
+          <div class="cloud-code-box" id="cloudCodeDisplay"></div>
+          <div style="font-size:0.75rem;color:var(--text-light);margin-top:5px;">שתף קוד זה עם בני המשפחה</div>
+          <button class="btn-cloud" onclick="copyCloudCode()">📋 העתק קוד לשיתוף</button>
+          <button class="btn-cloud" onclick="syncNow()">🔄 סנכרן עכשיו</button>
+          <button class="btn-cloud red" onclick="disconnectCloud()">התנתק מהענן</button>
+        </div>
+
+        <!-- SETUP UI -->
+        <div id="cloudDisconnectedUI">
+          <div class="setup-steps">
+            <strong>הגדרה חד-פעמית (5 דקות):</strong>
+            <ol>
+              <li>כנס ל-<a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a></li>
+              <li>לחץ <strong>"Add project"</strong> → שם כלשהו → Continue</li>
+              <li>בתפריט שמאל: <strong>Build → Realtime Database → Create database</strong></li>
+              <li>בחר <strong>"Start in test mode"</strong> → Enable</li>
+              <li>העתק את ה-URL שנראה כך:<br><code style="font-size:0.75rem;color:#1A5276;">https://שם-default-rtdb.firebaseio.com</code></li>
+              <li>הדבק כאן ↓</li>
+            </ol>
           </div>
           <div class="cloud-input-row" style="margin-top:10px;">
-            <button class="btn-cloud" onclick="syncNow()" style="flex:1;">🔄 סנכרן עכשיו</button>
-            <button class="btn-cloud" onclick="disconnectCloud()" style="background:#E74C3C;">התנתק</button>
+            <input class="form-input" id="fbUrlInput" placeholder="https://xxx-default-rtdb.firebaseio.com" style="font-size:0.8rem;" dir="ltr">
+            <button class="btn-cloud" onclick="setupFirebase()" style="background:#1E8449;">חבר</button>
           </div>
-        </div>
-        <div id="cloudDisconnectedUI">
+          <div style="text-align:center;font-size:0.78rem;color:var(--text-light);margin:10px 0 4px;">— יש לך כבר קוד משפחה? —</div>
           <div class="cloud-input-row">
-            <button class="btn-cloud green" onclick="createFamilyCloud()" style="flex:1;">✨ צור קוד משפחה חדש</button>
-          </div>
-          <div style="text-align:center;font-size:0.78rem;color:var(--text-light);margin:8px 0;">— או —</div>
-          <div class="cloud-input-row">
-            <input class="form-input" id="joinCodeInput" placeholder="הכנס קוד קיים..." style="font-size:0.9rem;">
+            <input class="form-input" id="joinCodeInput" placeholder="הכנס קוד משפחה..." style="font-size:0.85rem;" dir="ltr">
             <button class="btn-cloud" onclick="joinFamilyCloud()">הצטרף</button>
           </div>
         </div>
@@ -1123,6 +1142,10 @@ const CAT_EMOJI = {
 // ===== STORAGE =====
 function save() {
   localStorage.setItem(DB_KEY, JSON.stringify(recipes));
+}
+function saveAndSync() {
+  save();
+  if (typeof getFbUrl === 'function' && getFbUrl()) pushToCloud().catch(() => {});
 }
 function load() {
   try {
@@ -1439,7 +1462,7 @@ function saveRecipe() {
     recipes.unshift(r);
   }
 
-  save();
+  saveAndSync();
   closeForm();
   renderRecipes();
   showToast(editingId ? '✅ המתכון עודכן' : '✅ המתכון נשמר!');
@@ -1453,7 +1476,7 @@ function confirmDelete(id) {
   document.getElementById('confirmMsg').textContent = `למחוק את המתכון "${r.title}"?`;
   document.getElementById('confirmOkBtn').onclick = () => {
     recipes = recipes.filter(x => x.id !== id);
-    save();
+    saveAndSync();
     closeConfirm();
     closeView();
     renderRecipes();
@@ -1640,8 +1663,7 @@ function shareRecipe(id) {
 .sync-status {
   display: flex; align-items: center; gap: 6px;
   font-size: 0.78rem; padding: 6px 12px;
-  border-radius: 50px; margin-bottom: 4px;
-  font-weight: 600;
+  border-radius: 50px; margin-bottom: 8px; font-weight: 600;
 }
 .sync-status.connected { background: #EAFAF1; color: #1E8449; }
 .sync-status.disconnected { background: #FEF9E7; color: #9A7D0A; }
@@ -1650,27 +1672,37 @@ function shareRecipe(id) {
 .sync-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .sync-status.connected .sync-dot { background: #27AE60; }
 .sync-status.disconnected .sync-dot { background: #F39C12; }
-.sync-status.syncing .sync-dot { background: #2980B9; animation: pulse 1s infinite; }
+.sync-status.syncing .sync-dot { background: #2980B9; animation: blink 1s infinite; }
 .sync-status.error .sync-dot { background: #E74C3C; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-.cloud-input-row { display: flex; gap: 8px; margin-top: 8px; }
-.cloud-input-row input { flex: 1; }
 .btn-cloud {
   background: var(--brown-mid); color: white; border: none;
   border-radius: var(--radius-sm); padding: 10px 14px;
   font-family: 'Assistant', sans-serif; font-size: 0.88rem;
   font-weight: 700; cursor: pointer; white-space: nowrap;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s; width: 100%; margin-top: 8px;
 }
 .btn-cloud:hover { opacity: 0.85; }
 .btn-cloud.green { background: #1E8449; }
-.cloud-code-display {
+.btn-cloud.red { background: #C0392B; }
+.cloud-input-row { display: flex; gap: 8px; margin-top: 8px; }
+.cloud-input-row input { flex: 1; }
+.cloud-input-row .btn-cloud { width: auto; margin-top: 0; }
+.cloud-code-box {
   background: var(--parchment); border-radius: var(--radius-sm);
-  padding: 10px 14px; font-size: 0.9rem; color: var(--text-dark);
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 8px; font-weight: 600; letter-spacing: 0.05em;
+  padding: 10px 14px; font-size: 0.78rem; color: var(--text-mid);
+  margin-top: 8px; word-break: break-all; line-height: 1.5;
+  border: 1px solid #D5C0A5;
 }
+.setup-steps {
+  background: #FBF7F0; border: 1px solid #E0CBA8;
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  margin-top: 8px; font-size: 0.82rem; line-height: 1.8;
+  color: var(--text-mid);
+}
+.setup-steps ol { padding-right: 18px; }
+.setup-steps a { color: var(--terracotta); }
 </style>
 </head>
 <body>
@@ -1875,8 +1907,7 @@ function exportData() {
 .sync-status {
   display: flex; align-items: center; gap: 6px;
   font-size: 0.78rem; padding: 6px 12px;
-  border-radius: 50px; margin-bottom: 4px;
-  font-weight: 600;
+  border-radius: 50px; margin-bottom: 8px; font-weight: 600;
 }
 .sync-status.connected { background: #EAFAF1; color: #1E8449; }
 .sync-status.disconnected { background: #FEF9E7; color: #9A7D0A; }
@@ -1885,27 +1916,37 @@ function exportData() {
 .sync-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .sync-status.connected .sync-dot { background: #27AE60; }
 .sync-status.disconnected .sync-dot { background: #F39C12; }
-.sync-status.syncing .sync-dot { background: #2980B9; animation: pulse 1s infinite; }
+.sync-status.syncing .sync-dot { background: #2980B9; animation: blink 1s infinite; }
 .sync-status.error .sync-dot { background: #E74C3C; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-.cloud-input-row { display: flex; gap: 8px; margin-top: 8px; }
-.cloud-input-row input { flex: 1; }
 .btn-cloud {
   background: var(--brown-mid); color: white; border: none;
   border-radius: var(--radius-sm); padding: 10px 14px;
   font-family: 'Assistant', sans-serif; font-size: 0.88rem;
   font-weight: 700; cursor: pointer; white-space: nowrap;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s; width: 100%; margin-top: 8px;
 }
 .btn-cloud:hover { opacity: 0.85; }
 .btn-cloud.green { background: #1E8449; }
-.cloud-code-display {
+.btn-cloud.red { background: #C0392B; }
+.cloud-input-row { display: flex; gap: 8px; margin-top: 8px; }
+.cloud-input-row input { flex: 1; }
+.cloud-input-row .btn-cloud { width: auto; margin-top: 0; }
+.cloud-code-box {
   background: var(--parchment); border-radius: var(--radius-sm);
-  padding: 10px 14px; font-size: 0.9rem; color: var(--text-dark);
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 8px; font-weight: 600; letter-spacing: 0.05em;
+  padding: 10px 14px; font-size: 0.78rem; color: var(--text-mid);
+  margin-top: 8px; word-break: break-all; line-height: 1.5;
+  border: 1px solid #D5C0A5;
 }
+.setup-steps {
+  background: #FBF7F0; border: 1px solid #E0CBA8;
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  margin-top: 8px; font-size: 0.82rem; line-height: 1.8;
+  color: var(--text-mid);
+}
+.setup-steps ol { padding-right: 18px; }
+.setup-steps a { color: var(--terracotta); }
 </style>
 </head>
 <body>
@@ -2004,53 +2045,61 @@ function registerSW() {
 }
 
 
-// ===== CLOUD SYNC =====
-const CLOUD_KEY = 'recipes_cloud_id';
-const CLOUD_BASE = 'https://www.jsonstore.io/';
+// ===== CLOUD SYNC (Firebase Realtime Database) =====
+const FB_URL_KEY  = 'recipes_fb_url';
+const FB_PATH_KEY = 'recipes_fb_path';
 
-function getCloudId() { return localStorage.getItem(CLOUD_KEY) || ''; }
-function setCloudId(id) { localStorage.setItem(CLOUD_KEY, id); }
-
-function genUUID() {
-  return 'xxxx-xxxx-xxxx-xxxx'.replace(/x/g, () =>
-    Math.floor(Math.random()*16).toString(16));
+function getFbUrl()  { return (localStorage.getItem(FB_URL_KEY) || '').replace(/\/$/, ''); }
+function getFbPath() {
+  let p = localStorage.getItem(FB_PATH_KEY);
+  if (!p) {
+    p = 'fam_' + Math.random().toString(36).substr(2, 10);
+    localStorage.setItem(FB_PATH_KEY, p);
+  }
+  return p;
+}
+function getCloudCode() {
+  const url = getFbUrl(), path = getFbPath();
+  if (!url) return '';
+  return url + '|' + path;
 }
 
 function updateSyncUI() {
-  const id = getCloudId();
-  const el = document.getElementById('syncStatusEl');
-  const txt = document.getElementById('syncStatusText');
+  const el   = document.getElementById('syncStatusEl');
+  const txt  = document.getElementById('syncStatusText');
   const conn = document.getElementById('cloudConnectedUI');
   const disc = document.getElementById('cloudDisconnectedUI');
-  const codeEl = document.getElementById('cloudCodeDisplay');
+  const code = document.getElementById('cloudCodeDisplay');
   if (!el) return;
-  if (id) {
-    el.className = 'sync-status connected';
-    txt.textContent = 'מחובר לענן המשפחה';
+  const hasCloud = !!getFbUrl();
+  if (hasCloud) {
+    el.className  = 'sync-status connected';
+    txt.textContent = 'מחובר לענן המשפחה ✓';
     conn.style.display = 'block';
     disc.style.display = 'none';
-    codeEl.textContent = id;
+    if (code) code.textContent = getCloudCode();
   } else {
-    el.className = 'sync-status disconnected';
+    el.className  = 'sync-status disconnected';
     txt.textContent = 'לא מחובר לענן';
     conn.style.display = 'none';
     disc.style.display = 'block';
   }
 }
 
-async function createFamilyCloud() {
-  setSyncStatus('syncing', 'יוצר ענן...');
+async function setupFirebase() {
+  const url = (document.getElementById('fbUrlInput').value || '').trim().replace(/\/$/, '');
+  if (!url || !url.includes('firebaseio.com')) {
+    showToast('⚠️ כתובת Firebase לא תקינה'); return;
+  }
+  setSyncStatus('syncing', 'מתחבר...');
   try {
-    const id = genUUID();
-    const res = await fetch(CLOUD_BASE + id, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ recipes })
-    });
-    if (!res.ok) throw new Error('שגיאת שרת ' + res.status);
-    setCloudId(id);
+    // Test connection
+    const testRes = await fetch(url + '/.json');
+    if (!testRes.ok) throw new Error('כתובת לא נגישה');
+    localStorage.setItem(FB_URL_KEY, url);
+    await pushToCloud();
     updateSyncUI();
-    showToast('✅ ענן משפחתי נוצר!');
+    showToast('✅ מחובר לענן!');
   } catch(e) {
     setSyncStatus('error', 'שגיאה: ' + e.message);
     showToast('❌ ' + e.message);
@@ -2058,18 +2107,20 @@ async function createFamilyCloud() {
 }
 
 async function joinFamilyCloud() {
-  const id = (document.getElementById('joinCodeInput').value || '').trim();
-  if (!id) { showToast('הכנס קוד'); return; }
+  const code = (document.getElementById('joinCodeInput').value || '').trim();
+  if (!code.includes('|')) { showToast('קוד לא תקין'); return; }
+  const [url, path] = code.split('|');
   setSyncStatus('syncing', 'מתחבר...');
   try {
-    const res = await fetch(CLOUD_BASE + id);
+    const res = await fetch(url.replace(/\/$/, '') + '/yroslav/' + path + '.json');
     if (!res.ok) throw new Error('קוד לא נמצא');
     const data = await res.json();
-    const incoming = (data.result && data.result.recipes) || data.recipes || data.result;
-    if (!Array.isArray(incoming)) throw new Error('קוד לא תקין');
+    const incoming = data && data.recipes;
+    if (!Array.isArray(incoming)) throw new Error('אין מתכונים בקוד זה');
+    localStorage.setItem(FB_URL_KEY, url.replace(/\/$/, ''));
+    localStorage.setItem(FB_PATH_KEY, path);
     recipes = incoming;
     save();
-    setCloudId(id);
     updateSyncUI();
     renderRecipes();
     showToast('✅ מחובר! ' + recipes.length + ' מתכונים');
@@ -2080,48 +2131,49 @@ async function joinFamilyCloud() {
 }
 
 async function syncNow() {
-  const id = getCloudId();
-  if (!id) return;
+  const url = getFbUrl(), path = getFbPath();
+  if (!url) return;
   setSyncStatus('syncing', 'מסנכרן...');
   try {
-    const res = await fetch(CLOUD_BASE + id);
-    if (!res.ok) throw new Error('שגיאת התחברות');
-    const data = await res.json();
-    const cloud = (data.result && data.result.recipes) || data.recipes || data.result;
+    const res = await fetch(url + '/yroslav/' + path + '.json');
+    const data = res.ok ? await res.json() : null;
+    const cloud = data && data.recipes;
     let added = 0;
-    (Array.isArray(cloud) ? cloud : []).forEach(cr => {
-      if (!recipes.find(r => r.id === cr.id)) { recipes.push(cr); added++; }
-    });
-    if (added) { save(); renderRecipes(); }
+    if (Array.isArray(cloud)) {
+      cloud.forEach(cr => {
+        if (!recipes.find(r => r.id === cr.id)) { recipes.push(cr); added++; }
+      });
+      if (added) { save(); renderRecipes(); }
+    }
     await pushToCloud();
     setSyncStatus('connected', 'מסונכרן ✓');
-    showToast('✅ סונכרן' + (added ? ' · ' + added + ' מתכונים חדשים' : ''));
+    showToast('✅ סונכרן' + (added ? ' · ' + added + ' חדשים' : ''));
   } catch(e) {
-    setSyncStatus('error', 'שגיאה בסנכרון');
-    showToast('❌ שגיאת סנכרון');
+    setSyncStatus('error', 'שגיאת סנכרון');
+    showToast('❌ שגיאת סנכרון: ' + e.message);
   }
 }
 
 async function pushToCloud() {
-  const id = getCloudId();
-  if (!id) return;
-  await fetch(CLOUD_BASE + id, {
-    method: 'POST',
+  const url = getFbUrl(), path = getFbPath();
+  if (!url) return;
+  await fetch(url + '/yroslav/' + path + '.json', {
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ recipes })
+    body: JSON.stringify({ recipes, updatedAt: Date.now() })
   });
 }
 
 function disconnectCloud() {
   if (!confirm('להתנתק מהענן המשפחתי?')) return;
-  localStorage.removeItem(CLOUD_KEY);
+  localStorage.removeItem(FB_URL_KEY);
   updateSyncUI();
   showToast('התנתקת מהענן');
 }
 
 function copyCloudCode() {
-  const id = getCloudId();
-  navigator.clipboard.writeText(id).then(() => showToast('✅ הקוד הועתק'));
+  navigator.clipboard.writeText(getCloudCode())
+    .then(() => showToast('✅ הקוד הועתק — שלח לבני המשפחה'));
 }
 
 function setSyncStatus(cls, msg) {
@@ -2129,27 +2181,20 @@ function setSyncStatus(cls, msg) {
   const txt = document.getElementById('syncStatusText');
   if (!el) return;
   el.className = 'sync-status ' + cls;
-  txt.textContent = msg;
+  if (txt) txt.textContent = msg;
 }
 
-// Auto-sync on save
-const _origSave = save;
-function save() {
-  _origSave();
-  if (getCloudId()) {
-    pushToCloud().catch(() => {});
-  }
-}
+// Auto-push after every save - patch localStorage save
 
-// Auto-pull on load
+
 async function autoSync() {
-  const id = getCloudId();
-  if (!id) return;
+  const url = getFbUrl(), path = getFbPath();
+  if (!url) return;
   try {
-    const res = await fetch(CLOUD_BASE + id);
+    const res = await fetch(url + '/yroslav/' + path + '.json');
     if (!res.ok) return;
     const data = await res.json();
-    const cloud = (data.result && data.result.recipes) || data.recipes || data.result;
+    const cloud = data && data.recipes;
     if (!Array.isArray(cloud)) return;
     let added = 0;
     cloud.forEach(cr => {
@@ -2158,6 +2203,7 @@ async function autoSync() {
     if (added) { save(); renderRecipes(); showToast('☁️ ' + added + ' מתכונים חדשים מהענן'); }
   } catch(e) {}
 }
+
 
 // ===== INIT =====
 load();
