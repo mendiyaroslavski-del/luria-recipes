@@ -2006,10 +2006,15 @@ function registerSW() {
 
 // ===== CLOUD SYNC =====
 const CLOUD_KEY = 'recipes_cloud_id';
-const CLOUD_URL = 'https://jsonblob.com/api/jsonBlob';
+const CLOUD_BASE = 'https://www.jsonstore.io/';
 
 function getCloudId() { return localStorage.getItem(CLOUD_KEY) || ''; }
 function setCloudId(id) { localStorage.setItem(CLOUD_KEY, id); }
+
+function genUUID() {
+  return 'xxxx-xxxx-xxxx-xxxx'.replace(/x/g, () =>
+    Math.floor(Math.random()*16).toString(16));
+}
 
 function updateSyncUI() {
   const id = getCloudId();
@@ -2036,15 +2041,13 @@ function updateSyncUI() {
 async function createFamilyCloud() {
   setSyncStatus('syncing', 'יוצר ענן...');
   try {
-    const res = await fetch(CLOUD_URL, {
+    const id = genUUID();
+    const res = await fetch(CLOUD_BASE + id, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ recipes })
     });
-    if (!res.ok) throw new Error('שגיאת שרת');
-    const loc = res.headers.get('Location') || '';
-    const id = loc.split('/').pop();
-    if (!id) throw new Error('לא התקבל קוד');
+    if (!res.ok) throw new Error('שגיאת שרת ' + res.status);
     setCloudId(id);
     updateSyncUI();
     showToast('✅ ענן משפחתי נוצר!');
@@ -2059,11 +2062,11 @@ async function joinFamilyCloud() {
   if (!id) { showToast('הכנס קוד'); return; }
   setSyncStatus('syncing', 'מתחבר...');
   try {
-    const res = await fetch(CLOUD_URL + '/' + id);
+    const res = await fetch(CLOUD_BASE + id);
     if (!res.ok) throw new Error('קוד לא נמצא');
     const data = await res.json();
-    const incoming = data.recipes || data;
-    if (!Array.isArray(incoming)) throw new Error('מידע לא תקין');
+    const incoming = (data.result && data.result.recipes) || data.recipes || data.result;
+    if (!Array.isArray(incoming)) throw new Error('קוד לא תקין');
     recipes = incoming;
     save();
     setCloudId(id);
@@ -2081,20 +2084,15 @@ async function syncNow() {
   if (!id) return;
   setSyncStatus('syncing', 'מסנכרן...');
   try {
-    // Pull latest
-    const res = await fetch(CLOUD_URL + '/' + id);
+    const res = await fetch(CLOUD_BASE + id);
     if (!res.ok) throw new Error('שגיאת התחברות');
     const data = await res.json();
-    const cloud = data.recipes || data;
-    // Merge: add recipes not in local
+    const cloud = (data.result && data.result.recipes) || data.recipes || data.result;
     let added = 0;
     (Array.isArray(cloud) ? cloud : []).forEach(cr => {
-      if (!recipes.find(r => r.id === cr.id)) {
-        recipes.push(cr); added++;
-      }
+      if (!recipes.find(r => r.id === cr.id)) { recipes.push(cr); added++; }
     });
     if (added) { save(); renderRecipes(); }
-    // Push local to cloud
     await pushToCloud();
     setSyncStatus('connected', 'מסונכרן ✓');
     showToast('✅ סונכרן' + (added ? ' · ' + added + ' מתכונים חדשים' : ''));
@@ -2107,8 +2105,8 @@ async function syncNow() {
 async function pushToCloud() {
   const id = getCloudId();
   if (!id) return;
-  await fetch(CLOUD_URL + '/' + id, {
-    method: 'PUT',
+  await fetch(CLOUD_BASE + id, {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ recipes })
   });
@@ -2148,10 +2146,10 @@ async function autoSync() {
   const id = getCloudId();
   if (!id) return;
   try {
-    const res = await fetch(CLOUD_URL + '/' + id);
+    const res = await fetch(CLOUD_BASE + id);
     if (!res.ok) return;
     const data = await res.json();
-    const cloud = data.recipes || data;
+    const cloud = (data.result && data.result.recipes) || data.recipes || data.result;
     if (!Array.isArray(cloud)) return;
     let added = 0;
     cloud.forEach(cr => {
