@@ -845,6 +845,30 @@ main {
 }
 .setup-steps ol { padding-right: 18px; }
 .setup-steps a { color: var(--terracotta); }
+
+/* ===== COOKING METHOD ===== */
+.method-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.method-chip {
+  padding: 7px 14px; border-radius: 50px;
+  border: 2px solid #E0CBA8; background: white;
+  font-family: 'Assistant', sans-serif; font-size: 0.88rem;
+  font-weight: 600; color: var(--text-mid);
+  cursor: pointer; transition: all 0.18s; user-select: none;
+}
+.method-chip:hover { border-color: var(--terracotta-light); color: var(--terracotta); }
+.method-chip.selected {
+  background: var(--terracotta); border-color: var(--terracotta);
+  color: white; box-shadow: 0 2px 8px rgba(196,98,45,0.35);
+}
+.method-display {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+}
+.method-tag {
+  font-size: 0.78rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 50px;
+  background: rgba(196,98,45,0.12); color: var(--terracotta);
+  border: 1px solid rgba(196,98,45,0.25);
+}
 </style>
 </head>
 <body>
@@ -963,6 +987,19 @@ main {
         <input class="form-input" id="formDesc" placeholder="כמה מילים על המתכון...">
       </div>
 
+      <!-- COOKING METHOD -->
+      <div class="form-row">
+        <label class="form-label">אופן הכנה</label>
+        <div class="method-chips" id="methodChips">
+          <span class="method-chip" data-method="בישול" onclick="toggleMethod(this)">🍲 בישול</span>
+          <span class="method-chip" data-method="טיגון" onclick="toggleMethod(this)">🍳 טיגון</span>
+          <span class="method-chip" data-method="אפייה" onclick="toggleMethod(this)">🔥 אפייה</span>
+          <span class="method-chip" data-method="צלייה" onclick="toggleMethod(this)">🥩 צלייה</span>
+          <span class="method-chip" data-method="אידוי" onclick="toggleMethod(this)">♨️ אידוי</span>
+          <span class="method-chip" data-method="ללא בישול" onclick="toggleMethod(this)">🥗 ללא בישול</span>
+        </div>
+      </div>
+
       <!-- META -->
       <div class="form-grid-3">
         <div class="form-row">
@@ -1016,6 +1053,7 @@ main {
       <div class="view-cat-tag" id="viewCatTag"></div>
       <h1 class="view-title" id="viewTitle"></h1>
       <p class="view-desc" id="viewDesc"></p>
+      <div class="method-display" id="viewMethods" style="display:none;margin-top:6px;"></div>
     </div>
   </div>
 
@@ -1231,6 +1269,12 @@ function openView(id) {
   document.getElementById('viewCatTag').className = `view-cat-tag bg-cat-${r.cat}`;
   document.getElementById('viewTitle').textContent = r.title;
   document.getElementById('viewDesc').textContent = r.desc || '';
+  // methods display
+  const methodsEl = document.getElementById('viewMethods');
+  if (methodsEl) {
+    methodsEl.innerHTML = (r.methods||[]).map(m => `<span class="method-tag">${m}</span>`).join('');
+    methodsEl.style.display = r.methods && r.methods.length ? 'flex' : 'none';
+  }
 
   // Actions
   document.getElementById('viewActions').innerHTML = `
@@ -1309,6 +1353,10 @@ function openAddForm() {
   clearForm();
   addIngRow(); addIngRow(); addIngRow();
   addStepRow(); addStepRow();
+  // restore methods
+  document.querySelectorAll('#methodChips .method-chip').forEach(c => {
+    c.classList.toggle('selected', (r.methods||[]).includes(c.dataset.method));
+  });
   document.getElementById('formOverlay').classList.add('open');
 }
 
@@ -1357,6 +1405,7 @@ function clearForm() {
   document.getElementById('formId').value = '';
   document.getElementById('formImg').value = '';
   document.getElementById('imgUploadArea').innerHTML = `<div class="icon">📷</div><p>לחץ להוספת תמונה</p>`;
+  document.querySelectorAll('#methodChips .method-chip').forEach(c => c.classList.remove('selected'));
   document.getElementById('ingList').innerHTML = '';
   document.getElementById('stepsList').innerHTML = '';
 }
@@ -1439,6 +1488,9 @@ function saveRecipe() {
 
   const steps = Array.from(document.querySelectorAll('#stepsList textarea')).map(t => t.value.trim()).filter(Boolean);
 
+  const methods = Array.from(document.querySelectorAll('#methodChips .method-chip.selected'))
+    .map(c => c.dataset.method);
+
   const r = {
     id: editingId || ('r_' + Date.now()),
     title,
@@ -1448,6 +1500,7 @@ function saveRecipe() {
     cookTime: document.getElementById('formCookTime').value.trim(),
     servings: document.getElementById('formServings').value.trim(),
     notes: document.getElementById('formNotes').value.trim(),
+    methods: methods,
     img: document.getElementById('formImg').value,
     ingredients: ings,
     steps: steps,
@@ -1703,6 +1756,30 @@ function shareRecipe(id) {
 }
 .setup-steps ol { padding-right: 18px; }
 .setup-steps a { color: var(--terracotta); }
+
+/* ===== COOKING METHOD ===== */
+.method-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.method-chip {
+  padding: 7px 14px; border-radius: 50px;
+  border: 2px solid #E0CBA8; background: white;
+  font-family: 'Assistant', sans-serif; font-size: 0.88rem;
+  font-weight: 600; color: var(--text-mid);
+  cursor: pointer; transition: all 0.18s; user-select: none;
+}
+.method-chip:hover { border-color: var(--terracotta-light); color: var(--terracotta); }
+.method-chip.selected {
+  background: var(--terracotta); border-color: var(--terracotta);
+  color: white; box-shadow: 0 2px 8px rgba(196,98,45,0.35);
+}
+.method-display {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+}
+.method-tag {
+  font-size: 0.78rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 50px;
+  background: rgba(196,98,45,0.12); color: var(--terracotta);
+  border: 1px solid rgba(196,98,45,0.25);
+}
 </style>
 </head>
 <body>
@@ -1947,6 +2024,30 @@ function exportData() {
 }
 .setup-steps ol { padding-right: 18px; }
 .setup-steps a { color: var(--terracotta); }
+
+/* ===== COOKING METHOD ===== */
+.method-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.method-chip {
+  padding: 7px 14px; border-radius: 50px;
+  border: 2px solid #E0CBA8; background: white;
+  font-family: 'Assistant', sans-serif; font-size: 0.88rem;
+  font-weight: 600; color: var(--text-mid);
+  cursor: pointer; transition: all 0.18s; user-select: none;
+}
+.method-chip:hover { border-color: var(--terracotta-light); color: var(--terracotta); }
+.method-chip.selected {
+  background: var(--terracotta); border-color: var(--terracotta);
+  color: white; box-shadow: 0 2px 8px rgba(196,98,45,0.35);
+}
+.method-display {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+}
+.method-tag {
+  font-size: 0.78rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 50px;
+  background: rgba(196,98,45,0.12); color: var(--terracotta);
+  border: 1px solid rgba(196,98,45,0.25);
+}
 </style>
 </head>
 <body>
@@ -2265,6 +2366,10 @@ async function autoSync() {
 }
 
 
+
+function toggleMethod(el) {
+  el.classList.toggle('selected');
+}
 // ===== INIT =====
 load();
 injectManifest();
