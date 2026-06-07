@@ -869,6 +869,57 @@ main {
   background: rgba(196,98,45,0.12); color: var(--terracotta);
   border: 1px solid rgba(196,98,45,0.25);
 }
+
+/* ===== PIN DIALOG ===== */
+.pin-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 600;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.pin-overlay.open { display: flex; animation: fadeOverlay 0.2s ease; }
+.pin-box {
+  background: white; border-radius: var(--radius);
+  padding: 28px 24px 22px;
+  max-width: 320px; width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.pin-box .pin-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.pin-box h3 { font-family: 'Playfair Display',serif; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 6px; }
+.pin-box p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 18px; line-height: 1.5; }
+.pin-dots {
+  display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
+}
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #D5C0A5; background: white;
+  transition: all 0.15s;
+}
+.pin-dot.filled { background: var(--terracotta); border-color: var(--terracotta); }
+.pin-keypad {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+  margin-bottom: 14px;
+}
+.pin-key {
+  background: var(--parchment); border: none; border-radius: var(--radius-sm);
+  padding: 14px; font-size: 1.3rem; font-weight: 700;
+  font-family: 'Assistant',sans-serif; color: var(--text-dark);
+  cursor: pointer; transition: background 0.15s;
+}
+.pin-key:hover { background: #EDD9B8; }
+.pin-key.del { background: #FDECEA; color: #C0392B; }
+.pin-key.empty { background: transparent; cursor: default; }
+.pin-error { color: #E74C3C; font-size: 0.82rem; margin-top: -8px; margin-bottom: 8px; min-height: 18px; }
+.btn-pin-cancel {
+  background: none; border: none; color: var(--text-light);
+  font-family: 'Assistant',sans-serif; font-size: 0.9rem;
+  cursor: pointer; padding: 6px 16px; border-radius: 50px;
+  text-decoration: underline;
+}
 </style>
 </head>
 <body>
@@ -1130,11 +1181,19 @@ main {
         <span class="arrow">‹</span>
       </div>
       <input type="file" id="importInput" accept=".json" style="display:none" onchange="importData(event)">
-      <div class="settings-row" onclick="if(confirm('למחוק את כל המתכונים?')){localStorage.removeItem(DB_KEY);recipes=[];renderRecipes();closeSettings();showToast('נמחק הכל');}">
+      <div class="settings-row" onclick="requirePin('⚠️ מחיקת הכל', 'הכנס קוד למחיקת כל המתכונים', () => { localStorage.removeItem(DB_KEY); recipes=[]; renderRecipes(); closeSettings(); showToast('נמחק הכל'); })">
         <span class="icon">🗑️</span>
         <div class="info">
           <b>מחק את כל המתכונים</b>
           <small>פעולה בלתי הפיכה!</small>
+        </div>
+        <span class="arrow">‹</span>
+      </div>
+      <div class="settings-row" onclick="setNewPin()">
+        <span class="icon">🔑</span>
+        <div class="info">
+          <b>שנה קוד מחיקה</b>
+          <small>ברירת מחדל: 1234</small>
         </div>
         <span class="arrow">‹</span>
       </div>
@@ -1161,6 +1220,37 @@ main {
   </div>
 </div>
 
+
+<!-- PIN DIALOG -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-box">
+    <div class="pin-icon">🔐</div>
+    <h3 id="pinTitle">אימות נדרש</h3>
+    <p id="pinMsg">הכנס קוד 4 ספרות כדי לאשר</p>
+    <div class="pin-dots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinKey('1')">1</button>
+      <button class="pin-key" onclick="pinKey('2')">2</button>
+      <button class="pin-key" onclick="pinKey('3')">3</button>
+      <button class="pin-key" onclick="pinKey('4')">4</button>
+      <button class="pin-key" onclick="pinKey('5')">5</button>
+      <button class="pin-key" onclick="pinKey('6')">6</button>
+      <button class="pin-key" onclick="pinKey('7')">7</button>
+      <button class="pin-key" onclick="pinKey('8')">8</button>
+      <button class="pin-key" onclick="pinKey('9')">9</button>
+      <button class="pin-key empty"></button>
+      <button class="pin-key" onclick="pinKey('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <button class="btn-pin-cancel" onclick="closePinDialog()">ביטול</button>
+  </div>
+</div>
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -1781,6 +1871,57 @@ function shareRecipe(id) {
   background: rgba(196,98,45,0.12); color: var(--terracotta);
   border: 1px solid rgba(196,98,45,0.25);
 }
+
+/* ===== PIN DIALOG ===== */
+.pin-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 600;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.pin-overlay.open { display: flex; animation: fadeOverlay 0.2s ease; }
+.pin-box {
+  background: white; border-radius: var(--radius);
+  padding: 28px 24px 22px;
+  max-width: 320px; width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.pin-box .pin-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.pin-box h3 { font-family: 'Playfair Display',serif; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 6px; }
+.pin-box p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 18px; line-height: 1.5; }
+.pin-dots {
+  display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
+}
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #D5C0A5; background: white;
+  transition: all 0.15s;
+}
+.pin-dot.filled { background: var(--terracotta); border-color: var(--terracotta); }
+.pin-keypad {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+  margin-bottom: 14px;
+}
+.pin-key {
+  background: var(--parchment); border: none; border-radius: var(--radius-sm);
+  padding: 14px; font-size: 1.3rem; font-weight: 700;
+  font-family: 'Assistant',sans-serif; color: var(--text-dark);
+  cursor: pointer; transition: background 0.15s;
+}
+.pin-key:hover { background: #EDD9B8; }
+.pin-key.del { background: #FDECEA; color: #C0392B; }
+.pin-key.empty { background: transparent; cursor: default; }
+.pin-error { color: #E74C3C; font-size: 0.82rem; margin-top: -8px; margin-bottom: 8px; min-height: 18px; }
+.btn-pin-cancel {
+  background: none; border: none; color: var(--text-light);
+  font-family: 'Assistant',sans-serif; font-size: 0.9rem;
+  cursor: pointer; padding: 6px 16px; border-radius: 50px;
+  text-decoration: underline;
+}
 </style>
 </head>
 <body>
@@ -2048,6 +2189,57 @@ function exportData() {
   padding: 3px 10px; border-radius: 50px;
   background: rgba(196,98,45,0.12); color: var(--terracotta);
   border: 1px solid rgba(196,98,45,0.25);
+}
+
+/* ===== PIN DIALOG ===== */
+.pin-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px);
+  z-index: 600;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.pin-overlay.open { display: flex; animation: fadeOverlay 0.2s ease; }
+.pin-box {
+  background: white; border-radius: var(--radius);
+  padding: 28px 24px 22px;
+  max-width: 320px; width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.pin-box .pin-icon { font-size: 2.2rem; margin-bottom: 10px; }
+.pin-box h3 { font-family: 'Playfair Display',serif; font-size: 1.1rem; color: var(--text-dark); margin-bottom: 6px; }
+.pin-box p { font-size: 0.85rem; color: var(--text-light); margin-bottom: 18px; line-height: 1.5; }
+.pin-dots {
+  display: flex; justify-content: center; gap: 12px; margin-bottom: 20px;
+}
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid #D5C0A5; background: white;
+  transition: all 0.15s;
+}
+.pin-dot.filled { background: var(--terracotta); border-color: var(--terracotta); }
+.pin-keypad {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+  margin-bottom: 14px;
+}
+.pin-key {
+  background: var(--parchment); border: none; border-radius: var(--radius-sm);
+  padding: 14px; font-size: 1.3rem; font-weight: 700;
+  font-family: 'Assistant',sans-serif; color: var(--text-dark);
+  cursor: pointer; transition: background 0.15s;
+}
+.pin-key:hover { background: #EDD9B8; }
+.pin-key.del { background: #FDECEA; color: #C0392B; }
+.pin-key.empty { background: transparent; cursor: default; }
+.pin-error { color: #E74C3C; font-size: 0.82rem; margin-top: -8px; margin-bottom: 8px; min-height: 18px; }
+.btn-pin-cancel {
+  background: none; border: none; color: var(--text-light);
+  font-family: 'Assistant',sans-serif; font-size: 0.9rem;
+  cursor: pointer; padding: 6px 16px; border-radius: 50px;
+  text-decoration: underline;
 }
 </style>
 </head>
@@ -2392,6 +2584,86 @@ async function autoSync() {
 function toggleMethod(el) {
   el.classList.toggle('selected');
 }
+
+// ===== PIN PROTECTION =====
+const PIN_KEY = 'recipes_del_pin';
+const DEFAULT_PIN = '1234';
+let pinInput = '';
+let pinCallback = null;
+let pinMode = 'verify'; // 'verify' or 'set'
+
+function getPin() { return localStorage.getItem(PIN_KEY) || DEFAULT_PIN; }
+
+function requirePin(title, msg, callback) {
+  pinInput = '';
+  pinCallback = callback;
+  pinMode = 'verify';
+  document.getElementById('pinTitle').textContent = title;
+  document.getElementById('pinMsg').textContent = msg;
+  document.getElementById('pinError').textContent = '';
+  updatePinDots();
+  document.getElementById('pinOverlay').classList.add('open');
+}
+
+function pinKey(d) {
+  if (pinInput.length >= 4) return;
+  pinInput += d;
+  updatePinDots();
+  if (pinInput.length === 4) {
+    setTimeout(() => checkPin(), 150);
+  }
+}
+
+function pinDel() {
+  pinInput = pinInput.slice(0,-1);
+  document.getElementById('pinError').textContent = '';
+  updatePinDots();
+}
+
+function updatePinDots() {
+  for(let i=0;i<4;i++) {
+    document.getElementById('pd'+i).classList.toggle('filled', i < pinInput.length);
+  }
+}
+
+function checkPin() {
+  if (pinMode === 'verify') {
+    if (pinInput === getPin()) {
+      closePinDialog();
+      if (pinCallback) pinCallback();
+    } else {
+      document.getElementById('pinError').textContent = '❌ קוד שגוי — נסה שוב';
+      pinInput = '';
+      updatePinDots();
+      // Shake effect
+      const box = document.querySelector('.pin-box');
+      box.style.transform = 'translateX(-8px)';
+      setTimeout(()=>{ box.style.transform='translateX(8px)'; }, 80);
+      setTimeout(()=>{ box.style.transform=''; }, 160);
+    }
+  } else if (pinMode === 'set') {
+    localStorage.setItem(PIN_KEY, pinInput);
+    closePinDialog();
+    showToast('✅ קוד מחיקה עודכן ל-' + pinInput);
+  }
+}
+
+function closePinDialog() {
+  document.getElementById('pinOverlay').classList.remove('open');
+  pinInput = '';
+  pinCallback = null;
+}
+
+function setNewPin() {
+  pinInput = '';
+  pinMode = 'set';
+  document.getElementById('pinTitle').textContent = '🔑 הגדר קוד חדש';
+  document.getElementById('pinMsg').textContent = 'בחר 4 ספרות שיהיו קוד המחיקה';
+  document.getElementById('pinError').textContent = '';
+  updatePinDots();
+  document.getElementById('pinOverlay').classList.add('open');
+}
+
 // ===== INIT =====
 load();
 injectManifest();
