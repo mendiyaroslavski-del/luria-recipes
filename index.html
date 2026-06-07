@@ -2294,11 +2294,21 @@ async function joinFamilyCloud() {
 
 async function syncNow() {
   const url = getFbUrl(), path = getFbPath();
-  if (!url) return;
+  if (!url) { showToast('לא מחובר לענן'); return; }
   setSyncStatus('syncing', 'מסנכרן...');
   try {
-    const res = await fetch(url + '/yroslav/' + path + '.json');
-    const data = res.ok ? await res.json() : null;
+    // First push local recipes to cloud
+    const pushRes = await fetch(url + '/yroslav/' + path + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipes, updatedAt: Date.now() })
+    });
+    if (!pushRes.ok) throw new Error('שגיאת כתיבה: ' + pushRes.status);
+    
+    // Then pull from cloud
+    const pullRes = await fetch(url + '/yroslav/' + path + '.json');
+    if (!pullRes.ok) throw new Error('שגיאת קריאה: ' + pullRes.status);
+    const data = await pullRes.json();
     const cloud = data && data.recipes;
     let added = 0;
     if (Array.isArray(cloud)) {
@@ -2307,23 +2317,24 @@ async function syncNow() {
       });
       if (added) { save(); renderRecipes(); }
     }
-    await pushToCloud();
-    setSyncStatus('connected', 'מסונכרן ✓');
-    showToast('✅ סונכרן' + (added ? ' · ' + added + ' חדשים' : ''));
+    setSyncStatus('connected', 'מסונכרן ✓ · ' + recipes.length + ' מתכונים');
+    showToast('✅ הועלו ' + recipes.length + ' מתכונים לענן');
   } catch(e) {
-    setSyncStatus('error', 'שגיאת סנכרון');
-    showToast('❌ שגיאת סנכרון: ' + e.message);
+    setSyncStatus('error', 'שגיאה: ' + e.message);
+    showToast('❌ ' + e.message);
   }
 }
 
 async function pushToCloud() {
   const url = getFbUrl(), path = getFbPath();
   if (!url) return;
-  await fetch(url + '/yroslav/' + path + '.json', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ recipes, updatedAt: Date.now() })
-  });
+  try {
+    await fetch(url + '/yroslav/' + path + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ recipes, updatedAt: Date.now() })
+    });
+  } catch(e) {}
 }
 
 function disconnectCloud() {
@@ -2357,12 +2368,22 @@ async function autoSync() {
     if (!res.ok) return;
     const data = await res.json();
     const cloud = data && data.recipes;
-    if (!Array.isArray(cloud)) return;
+    if (!Array.isArray(cloud) || cloud.length === 0) return;
     let added = 0;
     cloud.forEach(cr => {
       if (!recipes.find(r => r.id === cr.id)) { recipes.push(cr); added++; }
     });
-    if (added) { save(); renderRecipes(); showToast('☁️ ' + added + ' מתכונים חדשים מהענן'); }
+    if (added) { 
+      save(); 
+      renderRecipes(); 
+      showToast('☁️ ' + added + ' מתכונים הורדו מהענן');
+    } else if (cloud.length > 0 && recipes.length === 0) {
+      // Force replace if local is empty
+      recipes = cloud;
+      save();
+      renderRecipes();
+      showToast('☁️ ' + cloud.length + ' מתכונים הורדו מהענן');
+    }
   } catch(e) {}
 }
 
