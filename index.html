@@ -1353,10 +1353,6 @@ function openAddForm() {
   clearForm();
   addIngRow(); addIngRow(); addIngRow();
   addStepRow(); addStepRow();
-  // restore methods
-  document.querySelectorAll('#methodChips .method-chip').forEach(c => {
-    c.classList.toggle('selected', (r.methods||[]).includes(c.dataset.method));
-  });
   document.getElementById('formOverlay').classList.add('open');
 }
 
@@ -1390,6 +1386,11 @@ function editRecipe(id) {
   const steps = r.steps && r.steps.length ? r.steps : ['',''];
   steps.forEach(s => addStepRow(s));
   if (!steps.length) addStepRow();
+
+  // restore cooking methods
+  document.querySelectorAll('#methodChips .method-chip').forEach(c => {
+    c.classList.toggle('selected', (r.methods||[]).includes(c.dataset.method));
+  });
 
   document.getElementById('formOverlay').classList.add('open');
 }
